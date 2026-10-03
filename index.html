@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chupi Gualy para Android</title>
+<meta name="description" content="Descarga Chupi Gualy, el videojuego en 3D de Chupicity, e instálalo en tu móvil Android. Funciona sin internet.">
+<meta property="og:title" content="Chupi Gualy para Android">
+<meta property="og:description" content="El videojuego en 3D de Chupicity: de día construye tu casa, de noche cuidado con los Gualy. Descárgalo gratis para tu móvil Android.">
+<meta property="og:image" content="logo.webp">
+<meta name="theme-color" content="#2b1d6b">
+<style>
+@font-face { font-family: "Fredoka"; font-weight: 600; font-display: swap; src: url(fonts/fredoka-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: "Fredoka"; font-weight: 700; font-display: swap; src: url(fonts/fredoka-latin-700-normal.woff2) format("woff2"); }
+:root { --ink: #2a2140; --paper: #fff8e8; --accent: #ff6b4a; --sun: #ffd23f; }
+* { box-sizing: border-box; }
+html { background: #1b1440; }
+html, body { margin: 0; }
+body { font-family: "Fredoka", "Trebuchet MS", "Segoe UI", system-ui, sans-serif; color: var(--ink); background: radial-gradient(circle at 50% 0%, #4a37a8, #1b1440 70%) fixed; min-height: 100vh; padding: 20px 16px 40px; }
+main { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; align-items: stretch; }
+.hero { text-align: center; color: #fff; }
+.logo { width: min(62vw, 250px); aspect-ratio: 1; border-radius: 24px; filter: drop-shadow(0 8px 22px rgba(0,0,0,.45)); }
+h1 { margin: 10px 0 4px; font-size: clamp(32px, 9vw, 44px); line-height: 1.05; }
+.sub { margin: 0; font-size: 18px; opacity: .92; }
+.card { background: var(--paper); border: 4px solid var(--ink); border-radius: 22px; box-shadow: 0 6px 0 var(--ink); padding: 18px; }
+.btn { display: block; text-align: center; text-decoration: none; background: var(--accent); color: #fff; font-weight: 700; font-size: 24px; padding: 16px 18px; border-radius: 18px; border: 4px solid var(--ink); box-shadow: 0 5px 0 var(--ink); }
+.btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--ink); }
+.btn small { display: block; font-weight: 600; font-size: 14px; opacity: .92; margin-top: 2px; }
+h2 { margin: 0 0 10px; font-size: 22px; }
+ol { margin: 0; padding-left: 24px; display: flex; flex-direction: column; gap: 8px; font-size: 17px; line-height: 1.35; }
+ol b { color: #b3340f; }
+.qr { display: flex; gap: 14px; align-items: center; }
+.qr img { width: 130px; height: 130px; border-radius: 12px; border: 3px solid var(--ink); flex: none; }
+.qr p { margin: 0; font-size: 16px; line-height: 1.35; }
+.facts { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 16px; }
+.foot { text-align: center; color: #fff; opacity: .75; font-size: 14px; margin-top: 4px; }
+.foot code { background: rgba(255,255,255,.15); padding: 1px 6px; border-radius: 6px; word-break: break-all; }
+</style>
+</head>
+<body>
+<main>
+  <section class="hero">
+    <img class="logo" src="logo.webp" alt="Chupi Gualy">
+    <h1>Chupi Gualy</h1>
+    <p class="sub">Videojuego en 3D para móvil Android · versión 4</p>
+  </section>
+
+  <a class="btn" href="https://github.com/ManuelBD145/chupi-gualy-descargas/releases/latest/download/chupi-gualy.apk" download>⬇️ Descargar la app para Android<small>Archivo chupi-gualy.apk · 3,6 MB · gratis</small></a>
+
+  <section class="card">
+    <h2>Cómo instalarla</h2>
+    <ol>
+      <li>Pulsa el botón de arriba <b>desde tu móvil Android</b>. Si el navegador dice que el archivo puede ser dañino, pulsa <b>«Descargar de todos modos»</b>: es normal con las apps que no están en Google Play.</li>
+      <li>Abre el archivo <b>chupi-gualy.apk</b> desde el aviso de descarga o desde la carpeta <b>Descargas</b>.</li>
+      <li>Si el móvil te lo pide, activa <b>«Permitir de esta fuente»</b> (instalar apps desconocidas) para el navegador y vuelve atrás.</li>
+      <li>Pulsa <b>«Instalar»</b>. Si sale un aviso de Google Play Protect, pulsa <b>«Instalar de todos modos»</b>.</li>
+      <li>Abre <b>Chupi Gualy</b> y… ¡a jugar en Chupicity!</li>
+    </ol>
+  </section>
+
+  <section class="card qr">
+    <img src="qr.png" alt="Código QR de esta página">
+    <p><b>¿Estás en el ordenador?</b><br>Escanea este código con el móvil para abrir esta página y descargar la app.</p>
+  </section>
+
+  <section class="card">
+    <h2>Lo que tienes que saber</h2>
+    <ul class="facts">
+      <li>📱 Funciona en Android 7 o superior.</li>
+      <li>✈️ No necesita internet y no pide ningún permiso.</li>
+      <li>💾 La partida se guarda sola en el móvil.</li>
+      <li>🔄 Para actualizar, vuelve a descargarla e instálala encima: no pierdes la partida.</li>
+    </ul>
+  </section>
+
+  <p class="foot">Dirección directa del archivo:<br><code>github.com/ManuelBD145/chupi-gualy-descargas/releases/latest/download/chupi-gualy.apk</code></p>
+</main>
+</body>
+</html>
