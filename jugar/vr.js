@@ -104,7 +104,7 @@ function drawDiag() {
     ['Pantalla de las gafas', lay ? lay.framebufferWidth + ' × ' + lay.framebufferHeight + (lay.antialias ? ' · suavizado' : '') : '?'],
     ['Mandos', pads || 'ninguno detectado'],
     ['Suelo / altura', (VR.eyeOffset ? 'sentado (sin suelo)' : 'suelo de la sala') + ' · cabeza a ' + (VR.cam.position.y).toFixed(2) + ' m'],
-    ['Juego', ($('verTxt') ? $('verTxt').textContent : '?') + ' · web ' + (document.querySelector('script[src="vr.js"]') ? 'instalable' : 'suelta')],
+    ['Juego', ($('verTxt') ? $('verTxt').textContent : '?') + ' · ' + (/^https?:$/.test(location.protocol) ? 'web' : 'archivo suelto')],
     ['Fallos desde que entraste', String(VR.errCount || 0)]
   ];
   rows.forEach((rw, k) => {
