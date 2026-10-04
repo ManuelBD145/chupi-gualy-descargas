@@ -3,38 +3,57 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chupi Gualy para Android</title>
-<meta name="description" content="Descarga Chupi Gualy, el videojuego en 3D de Chupicity, e instálalo en tu móvil Android. Funciona sin internet.">
-<meta property="og:title" content="Chupi Gualy para Android">
-<meta property="og:description" content="El videojuego en 3D de Chupicity: de día construye tu casa, de noche cuidado con los Gualy. Descárgalo gratis para tu móvil Android.">
+<title>Chupi Gualy · Android, gafas Meta Quest y navegador</title>
+<meta name="description" content="Chupi Gualy, el videojuego en 3D de Chupicity: juega al momento en el navegador, instálalo en tu móvil Android o entra dentro con unas gafas Meta Quest.">
+<meta property="og:title" content="Chupi Gualy">
+<meta property="og:description" content="El videojuego en 3D de Chupicity: de día construye tu casa, de noche cuidado con los Gualy. En el navegador, en Android y en gafas Meta Quest.">
 <meta property="og:image" content="logo.webp">
 <meta name="theme-color" content="#2b1d6b">
 <style>
 @font-face { font-family: "Fredoka"; font-weight: 600; font-display: swap; src: url(fonts/fredoka-latin-600-normal.woff2) format("woff2"); }
 @font-face { font-family: "Fredoka"; font-weight: 700; font-display: swap; src: url(fonts/fredoka-latin-700-normal.woff2) format("woff2"); }
-:root { --ink: #2a2140; --paper: #fff8e8; --accent: #ff6b4a; --sun: #ffd23f; }
+:root { --ink: #2a2140; --paper: #fff8e8; --accent: #ff6b4a; --sun: #ffd23f; --sky: #9be7ff; }
 * { box-sizing: border-box; }
-html { background: #1b1440; }
+html { background: #1b1440; scroll-behavior: smooth; }
 html, body { margin: 0; }
 body { font-family: "Fredoka", "Trebuchet MS", "Segoe UI", system-ui, sans-serif; color: var(--ink); background: radial-gradient(circle at 50% 0%, #4a37a8, #1b1440 70%) fixed; min-height: 100vh; padding: 20px 16px 40px; }
-main { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; align-items: stretch; }
+main { max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; align-items: stretch; }
 .hero { text-align: center; color: #fff; }
-.logo { width: min(62vw, 250px); aspect-ratio: 1; border-radius: 24px; filter: drop-shadow(0 8px 22px rgba(0,0,0,.45)); }
+.logo { width: min(56vw, 230px); aspect-ratio: 1; border-radius: 24px; filter: drop-shadow(0 8px 22px rgba(0,0,0,.45)); }
 h1 { margin: 10px 0 4px; font-size: clamp(32px, 9vw, 44px); line-height: 1.05; }
 .sub { margin: 0; font-size: 18px; opacity: .92; }
 .card { background: var(--paper); border: 4px solid var(--ink); border-radius: 22px; box-shadow: 0 6px 0 var(--ink); padding: 18px; }
-.btn { display: block; text-align: center; text-decoration: none; background: var(--accent); color: #fff; font-weight: 700; font-size: 24px; padding: 16px 18px; border-radius: 18px; border: 4px solid var(--ink); box-shadow: 0 5px 0 var(--ink); }
+.card.vr { background: #e9f9ff; }
+.card.hot { outline: 5px solid var(--sun); outline-offset: 4px; }
+.btn { display: block; text-align: center; text-decoration: none; background: var(--accent); color: #fff; font-weight: 700; font-size: 23px; padding: 15px 18px; border-radius: 18px; border: 4px solid var(--ink); box-shadow: 0 5px 0 var(--ink); cursor: pointer; font-family: inherit; width: 100%; }
 .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--ink); }
-.btn small { display: block; font-weight: 600; font-size: 14px; opacity: .92; margin-top: 2px; }
+.btn small { display: block; font-weight: 600; font-size: 14px; opacity: .95; margin-top: 2px; }
+.btn.play { background: #3ec96a; font-size: 27px; padding: 18px; }
+.btn.vr { background: #6d5bff; }
+.btn.alt { background: #fff; color: var(--ink); }
+.btns { display: grid; gap: 12px; }
 h2 { margin: 0 0 10px; font-size: 22px; }
-ol { margin: 0; padding-left: 24px; display: flex; flex-direction: column; gap: 8px; font-size: 17px; line-height: 1.35; }
-ol b { color: #b3340f; }
-.qr { display: flex; gap: 14px; align-items: center; }
-.qr img { width: 130px; height: 130px; border-radius: 12px; border: 3px solid var(--ink); flex: none; }
-.qr p { margin: 0; font-size: 16px; line-height: 1.35; }
+h3 { margin: 14px 0 6px; font-size: 18px; }
+p { margin: 0 0 10px; font-size: 17px; line-height: 1.4; }
+ol, ul { margin: 0; padding-left: 24px; display: flex; flex-direction: column; gap: 8px; font-size: 17px; line-height: 1.35; }
+ol b, p b { color: #b3340f; }
+code { background: #fff; border: 2px solid var(--ink); border-radius: 8px; padding: 1px 7px; font-size: 15px; word-break: break-all; }
+.addr { display: block; text-align: center; font-size: 17px; padding: 8px 10px; margin: 6px 0 10px; }
+.tag { display: inline-block; background: var(--sun); border: 3px solid var(--ink); border-radius: 999px; padding: 0 10px; font-size: 14px; font-weight: 700; vertical-align: 2px; }
+.ok { background: #d8f5c4; border: 3px solid var(--ink); border-radius: 14px; padding: 8px 12px; font-weight: 600; margin: 0 0 10px; }
+.keys { width: 100%; border-collapse: collapse; font-size: 16px; }
+.keys td { padding: 6px 4px; border-top: 2px dashed #b9b0d3; vertical-align: top; }
+.keys td:first-child { font-weight: 700; white-space: nowrap; padding-right: 10px; }
+.qrs { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; text-align: center; }
+.qrs img { width: 100%; max-width: 190px; aspect-ratio: 1; border-radius: 12px; border: 3px solid var(--ink); background: #fff; }
+.qrs p { font-size: 15px; margin: 6px 0 0; }
 .facts { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 16px; }
-.foot { text-align: center; color: #fff; opacity: .75; font-size: 14px; margin-top: 4px; }
-.foot code { background: rgba(255,255,255,.15); padding: 1px 6px; border-radius: 6px; word-break: break-all; }
+details { margin-top: 10px; }
+summary { cursor: pointer; font-weight: 700; font-size: 17px; }
+details p, details ul { margin-top: 8px; }
+.foot { text-align: center; color: #fff; opacity: .78; font-size: 14px; margin-top: 4px; }
+.foot code { background: rgba(255,255,255,.15); border: 0; color: #fff; }
+.foot a { color: #fff; }
 </style>
 </head>
 <body>
@@ -42,38 +61,99 @@ ol b { color: #b3340f; }
   <section class="hero">
     <img class="logo" src="logo.webp" alt="Chupi Gualy">
     <h1>Chupi Gualy</h1>
-    <p class="sub">Videojuego en 3D para móvil Android · versión 5</p>
+    <p class="sub">Videojuego en 3D · versión 11.0<br>en el navegador, en Android y en gafas Meta Quest</p>
   </section>
 
-  <a class="btn" href="https://github.com/ManuelBD145/chupi-gualy-descargas/releases/latest/download/chupi-gualy.apk" download>⬇️ Descargar la app para Android<small>Archivo chupi-gualy.apk · 3,6 MB · gratis</small></a>
+  <div class="btns">
+    <a class="btn play" href="jugar/">▶ Jugar ahora<small>En el navegador, sin instalar nada · móvil, ordenador y gafas</small></a>
+    <a class="btn" href="https://github.com/ManuelBD145/chupi-gualy-descargas/releases/latest/download/chupi-gualy.apk" download>⬇️ Descargar para Android<small>Archivo chupi-gualy.apk · 3,8 MB · gratis</small></a>
+    <a class="btn vr" href="#gafas">🥽 Jugar con gafas Meta Quest<small>Entras dentro de Chupicity y andas con los mandos</small></a>
+  </div>
+
+  <section class="card" id="android">
+    <h2>📱 En un móvil o tablet Android</h2>
+    <h3>Forma 1 · Instalarla desde el navegador <span class="tag">sin avisos</span></h3>
+    <ol>
+      <li>Abre <b>«Jugar ahora»</b> con <b>Chrome</b> (o Edge o Samsung Internet).</li>
+      <li>Pulsa <b>«📲 Instalar en este dispositivo»</b>, que sale en la portada. Si no sale, abre el menú ⋮ del navegador y elige <b>«Instalar app»</b>.</li>
+      <li>Ya está: aparece <b>Chupi Gualy</b> con su icono, se abre a pantalla completa y <b>funciona sin internet</b>.</li>
+    </ol>
+    <p style="margin-top:10px">Como no es un archivo APK, <b>Google Play Protect no sale</b>. En iPhone y iPad: Compartir → <b>Añadir a pantalla de inicio</b>.</p>
+
+    <h3>Forma 2 · El archivo APK</h3>
+    <ol>
+      <li>Pulsa <b>«Descargar para Android»</b> desde el móvil. Si el navegador dice que el archivo puede ser dañino, pulsa <b>«Descargar de todos modos»</b>.</li>
+      <li>Ábrelo desde el aviso de descarga o desde la carpeta <b>Descargas</b>. Si te lo pide, activa <b>«Permitir de esta fuente»</b> para el navegador y vuelve atrás.</li>
+      <li>Si sale <b>Google Play Protect</b>, pulsa <b>«Más detalles»</b> y luego <b>«Instalar de todos modos»</b> (o «Instalar sin analizar»). Es normal: Play Protect avisa de toda app que no viene de Google Play y que todavía no conoce. Esta no pide permisos ni internet.</li>
+      <li>Pulsa <b>«Instalar»</b> y abre <b>Chupi Gualy</b>.</li>
+    </ol>
+    <details>
+      <summary>Ya tenía una versión antigua</summary>
+      <p>Desinstálala antes de instalar esta: la app ahora lleva firma propia y Android no deja instalar una encima de la otra (se pierde la partida de la versión vieja). Las versiones nuevas desde esta sí se instalan encima sin perder nada.</p>
+    </details>
+  </section>
+
+  <section class="card vr" id="gafas">
+    <h2>🥽 Con gafas Meta Quest <span class="tag">VR</span></h2>
+    <p class="ok" id="vrStatus" hidden></p>
+    <ol>
+      <li>Ponte las gafas y abre el <b>Navegador</b> (el icono del globo del menú de aplicaciones).</li>
+      <li>Escribe esta dirección y guárdala en favoritos:
+        <code class="addr">manuelbd145.github.io/chupi-gualy-descargas/jugar</code></li>
+      <li>Pulsa <b>«¡Jugar!»</b> y después <b>«🥽 Jugar con gafas VR»</b>. Si las gafas piden permiso, acepta.</li>
+      <li>¡Estás dentro de Chupicity! Para salir: botón <b>B</b> o <b>Y</b> → <b>«Salir de VR»</b>, o el botón de Meta.</li>
+    </ol>
+    <a class="btn vr" href="jugar/" style="margin-top:12px">🥽 Abrir el juego<small>Si estás leyendo esto en las gafas, toca aquí</small></a>
+
+    <h3>Los mandos</h3>
+    <table class="keys">
+      <tr><td>Palanca izquierda</td><td>Andar hacia donde miras (también puedes andar de verdad por tu sala)</td></tr>
+      <tr><td>Palanca derecha</td><td>Girar a saltitos · hacia delante o atrás: subir o bajar de planta en casa</td></tr>
+      <tr><td>Gatillo</td><td>La linterna contra los Gualy · con un menú abierto, pulsar lo que señalas</td></tr>
+      <tr><td>A, X o agarre</td><td>Usar lo que diga el cartel de abajo: entrar, subir al coche, sentarte, comprar…</td></tr>
+      <tr><td>B o Y</td><td>Menú rápido: bolsillo, comida, dinero, ajustes, ayuda y salir de VR</td></tr>
+    </table>
+    <details>
+      <summary>Más cosas para las gafas</summary>
+      <ul>
+        <li>Funciona en <b>Meta Quest 2, Quest 3, Quest 3S y Quest Pro</b>, con el navegador de las gafas al día.</li>
+        <li>Las gafas con la <b>app de Android</b> instalada también la abren, pero plana; su botón «🥽 Jugar en VR» abre esta versión web para entrar de verdad.</li>
+        <li>Si algo va a tirones, sal de VR y vuelve a entrar; el juego se guarda solo.</li>
+      </ul>
+    </details>
+  </section>
 
   <section class="card">
-    <h2>Cómo instalarla</h2>
-    <ol>
-      <li>Pulsa el botón de arriba <b>desde tu móvil Android</b>. Si el navegador dice que el archivo puede ser dañino, pulsa <b>«Descargar de todos modos»</b>: es normal con las apps que no están en Google Play.</li>
-      <li>Abre el archivo <b>chupi-gualy.apk</b> desde el aviso de descarga o desde la carpeta <b>Descargas</b>.</li>
-      <li>Si el móvil te lo pide, activa <b>«Permitir de esta fuente»</b> (instalar apps desconocidas) para el navegador y vuelve atrás.</li>
-      <li>Pulsa <b>«Instalar»</b>. Si sale un aviso de Google Play Protect, pulsa <b>«Instalar de todos modos»</b>.</li>
-      <li>Abre <b>Chupi Gualy</b> y… ¡a jugar en Chupicity!</li>
-    </ol>
-  </section>
-
-  <section class="card qr">
-    <img src="qr.png" alt="Código QR de esta página">
-    <p><b>¿Estás en el ordenador?</b><br>Escanea este código con el móvil para abrir esta página y descargar la app.</p>
+    <h2>📷 Códigos QR</h2>
+    <div class="qrs">
+      <div><img src="qr-pagina.png" alt="Código QR de esta página"><p><b>Esta página</b><br>con todas las formas de jugar</p></div>
+      <div><img src="qr-jugar.png" alt="Código QR del juego en el navegador"><p><b>Jugar ahora</b><br>abre el juego directamente</p></div>
+    </div>
+    <p style="margin-top:12px">Escanéalos con la cámara del móvil. Para las gafas, escribe la dirección del recuadro de arriba.</p>
   </section>
 
   <section class="card">
     <h2>Lo que tienes que saber</h2>
     <ul class="facts">
-      <li>📱 Funciona en Android 7 o superior.</li>
-      <li>✈️ No necesita internet y no pide ningún permiso.</li>
-      <li>💾 La partida se guarda sola en el móvil.</li>
-      <li>🔄 Para actualizar, vuelve a descargarla e instálala encima: no pierdes la partida.</li>
+      <li>✈️ Después de la primera vez <b>funciona sin internet</b> (en el navegador instalado y en la app).</li>
+      <li>💾 La partida se guarda sola en cada dispositivo. La del navegador y la de la app son distintas.</li>
+      <li>📱 La app de Android necesita Android 7 o superior y no pide ningún permiso.</li>
+      <li>🔄 Las versiones nuevas se instalan encima de la anterior sin perder la partida.</li>
     </ul>
   </section>
 
-  <p class="foot">Dirección directa del archivo:<br><code>github.com/ManuelBD145/chupi-gualy-descargas/releases/latest/download/chupi-gualy.apk</code></p>
+  <p class="foot">Archivo directo del APK:<br><code>github.com/ManuelBD145/chupi-gualy-descargas/releases/latest/download/chupi-gualy.apk</code><br>Cada versión tiene su huella SHA-256 en <a href="https://github.com/ManuelBD145/chupi-gualy-descargas/releases">Releases</a>.</p>
 </main>
+<script>
+// si esta página se abre en unas gafas, se avisa y se resalta la parte de VR
+(async () => {
+  const ua = navigator.userAgent, quest = /OculusBrowser|Quest/i.test(ua);
+  let vr = false;
+  try { vr = !!(navigator.xr && await navigator.xr.isSessionSupported('immersive-vr')); } catch (e) {}
+  const st = document.getElementById('vrStatus');
+  if (vr) { st.hidden = false; st.textContent = '✅ ¡Tus gafas están listas! Pulsa «Abrir el juego».'; document.getElementById('gafas').classList.add('hot'); }
+  else if (quest) { st.hidden = false; st.style.background = '#ffe1d9'; st.textContent = '⚠️ Para entrar en VR hace falta abrir esta página con https y el navegador de las gafas al día.'; }
+})();
+</script>
 </body>
 </html>
