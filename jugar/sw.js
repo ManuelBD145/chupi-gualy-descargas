@@ -1,7 +1,7 @@
 // Chupi Gualy sin internet: la primera vez se guarda todo el juego en el dispositivo y después abre al instante, aunque no haya conexión.
 // Si hay conexión, cada vez que se abre se mira si hay una versión nueva y se usa la próxima vez.
-// tools/publish-web.ps1 cambia 554476e-202610041108 por un código distinto en cada publicación.
-const BUILD = '554476e-202610041108';
+// tools/publish-web.ps1 cambia 2b4ba20-202610041119 por un código distinto en cada publicación.
+const BUILD = '2b4ba20-202610041119';
 const CACHE = 'chupi-gualy-' + BUILD;
 const CORE = [
   './', 'index.html', 'vr.js', 'pwa.js', 'manifest.webmanifest', 'logo.webp',

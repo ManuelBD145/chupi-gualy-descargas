@@ -15,7 +15,7 @@ const INK = '#2a2140', PAPER = '#fff8e8', SUN = '#ffd23f', ACCENT = '#ff6b4a';
 const FONT = '"Fredoka", "Trebuchet MS", "Segoe UI", system-ui, sans-serif';
 
 // ---------- ajustes de las gafas (se guardan en el navegador) ----------
-const DEF = { snap: 45, speed: 1, vignette: true, helpSeen: false };
+const DEF = { snap: 45, speed: 1, vignette: true, comfort: true, seated: false, helpSeen: false };
 const cfg = (() => { try { return Object.assign({}, DEF, JSON.parse(localStorage.getItem('chupi.vr') || '{}')); } catch (e) { return Object.assign({}, DEF); } })();
 const saveCfg = () => { try { localStorage.setItem('chupi.vr', JSON.stringify(cfg)); } catch (e) {} };
 
@@ -47,7 +47,7 @@ function addButtons(mode) {
   if (row) { const b = document.createElement('button'); b.className = 'btn'; b.id = 'vrBtn2'; b.textContent = mode === 'app' ? '🥽 Jugar en VR' : '🥽 Entrar en VR'; row.appendChild(b); b.addEventListener('click', go); }
 }
 // la app de Android instalada en unas gafas Meta Quest se ve como una ventana plana: para entrar en VR hay que abrir la versión web en el navegador de las gafas
-function openWeb() { try { window.open(WEB_URL, '_blank'); } catch (e) { location.href = WEB_URL; } }
+function openWeb() { try { location.assign(WEB_URL); } catch (e) { window.open(WEB_URL, '_blank'); } } // Capacitor abre las direcciones de fuera de la app en el navegador del sistema
 (async () => {
   try { supported = !!(navigator.xr && navigator.xr.isSessionSupported && await navigator.xr.isSessionSupported('immersive-vr')); } catch (e) { supported = false; }
   VR.supported = supported;
@@ -61,16 +61,19 @@ async function enter() {
   VRX.entering = true; // para que ¡Jugar! no pida pantalla completa
   try {
     if (!$('start').classList.contains('hidden')) $('playBtn').click();
-    const session = await navigator.xr.requestSession('immersive-vr', { optionalFeatures: ['local-floor', 'bounded-floor'] });
+    else if (!$('menu').classList.contains('hidden')) $('menuClose').click();
+    const session = await navigator.xr.requestSession('immersive-vr', { optionalFeatures: ['local-floor', 'bounded-floor', 'hand-tracking'] });
     await begin(session);
   } catch (e) {
     VRX.entering = false;
     console.warn('VR:', e);
+    try { if (VR.session) VR.session.end(); } catch (e2) {}
     if (A.toast) A.toast('No se ha podido entrar en VR: ' + ((e && e.message) || e), 5);
   }
 }
 
 // ---------- dentro de las gafas ----------
+function collectLights(scene) { pointLights.length = 0; scene.traverse(o => { if ((o.isPointLight || o.isSpotLight) && o.distance > 0) pointLights.push(o); }); }
 let Tj, tmpV, tmpV2, tmpQ, tmpM, Yaxis;
 const pointLights = [];
 
@@ -101,7 +104,7 @@ async function begin(session) {
   try { VR.shadowType = r.shadowMap.type; r.shadowMap.type = T.PCFShadowMap; r.shadowMap.autoUpdate = false; r.shadowMap.needsUpdate = true; } catch (e) {}
   if (A.deco.on) A.closeDeco();
   for (const fb of A.fadeables) { fb.a = 1; for (const mt of fb.mats) { mt.opacity = 1; mt.depthWrite = true; } for (const ms of fb.meshes) ms.castShadow = true; }
-  scene.traverse(o => { if ((o.isPointLight || o.isSpotLight) && o.distance > 0) pointLights.push(o); });
+  collectLights(scene);
   VRX.on = true;
   VRX.entering = false;
   VR.prevHead = null; VR.lastT = 0; VR.frames = 0; VR.rigYaw = 0; VR.anchor = null; VR.lastState = ''; VR.fade = 1;
@@ -161,11 +164,15 @@ function buildRig(A) {
   }
   // desvanecido a negro (al cambiar de sitio) y viñeta roja del miedo, pegados a los ojos
   const fadeMat = new T.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0, depthTest: false, depthWrite: false, fog: false });
-  const fade = new T.Mesh(new T.PlaneGeometry(2, 2), fadeMat); fade.position.z = -0.12; fade.renderOrder = 3000; fade.visible = false; cam.add(fade); VR.fadeMesh = fade;
+  const fade = new T.Mesh(new T.PlaneGeometry(5, 5), fadeMat); fade.position.z = -0.3; fade.renderOrder = 3000; fade.visible = false; cam.add(fade); VR.fadeMesh = fade;
   const vc = document.createElement('canvas'); vc.width = vc.height = 128; const vx = vc.getContext('2d');
   const gr = vx.createRadialGradient(64, 64, 30, 64, 64, 90); gr.addColorStop(0, 'rgba(120,0,15,0)'); gr.addColorStop(1, 'rgba(150,0,20,0.95)'); vx.fillStyle = gr; vx.fillRect(0, 0, 128, 128);
   const vt = new T.CanvasTexture(vc);
-  const vig = new T.Mesh(new T.PlaneGeometry(0.34, 0.34), new T.MeshBasicMaterial({ map: vt, transparent: true, opacity: 0, depthTest: false, depthWrite: false, fog: false })); vig.position.z = -0.12; vig.renderOrder = 2900; vig.visible = false; cam.add(vig); VR.fearMesh = vig;
+  const vig = new T.Mesh(new T.PlaneGeometry(1.4, 1.4), new T.MeshBasicMaterial({ map: vt, transparent: true, opacity: 0, depthTest: false, depthWrite: false, fog: false })); vig.position.z = -0.3; vig.renderOrder = 2900; vig.visible = false; cam.add(vig); VR.fearMesh = vig;
+  const tc = document.createElement('canvas'); tc.width = tc.height = 128; const tx = tc.getContext('2d');
+  const tg = tx.createRadialGradient(64, 64, 29, 64, 64, 64); tg.addColorStop(0, 'rgba(0,0,0,0)'); tg.addColorStop(0.6, 'rgba(0,0,0,0.6)'); tg.addColorStop(1, 'rgba(0,0,0,1)'); tx.fillStyle = tg; tx.fillRect(0, 0, 128, 128);
+  const tun = new T.Mesh(new T.PlaneGeometry(1.2, 1.2), new T.MeshBasicMaterial({ map: new T.CanvasTexture(tc), transparent: true, opacity: 0, depthTest: false, depthWrite: false, fog: false }));
+  tun.position.z = -0.3; tun.renderOrder = 2800; tun.visible = false; cam.add(tun); VR.tunnelMesh = tun; VR.tunnel = 0;
   buildPanels(A);
 }
 
@@ -241,6 +248,8 @@ function hubItems() {
   if (vis('downBtn')) items.push({ ico: '⬇️', txt: 'Bajar de planta', fn: () => $('downBtn').click() });
   items.push({ ico: '🔄', txt: 'Girar ' + (cfg.snap === 90 ? '90°' : cfg.snap + '°'), sub: 'toca para cambiar', keep: true, fn: () => { cfg.snap = cfg.snap === 45 ? 90 : cfg.snap === 90 ? 30 : 45; saveCfg(); } });
   items.push({ ico: '🚶', txt: 'Andar: ' + (cfg.speed < 1 ? 'despacio' : cfg.speed > 1 ? 'deprisa' : 'normal'), sub: 'toca para cambiar', keep: true, fn: () => { cfg.speed = cfg.speed === 1 ? 1.4 : cfg.speed > 1 ? 0.7 : 1; saveCfg(); } });
+  items.push({ ico: '🪑', txt: 'Jugar sentado: ' + (cfg.seated ? 'sí' : 'no'), sub: 'sube un poco la vista', keep: true, fn: () => { cfg.seated = !cfg.seated; saveCfg(); } });
+  items.push({ ico: '⭕', txt: 'Viñeta al moverte: ' + (cfg.comfort ? 'sí' : 'no'), sub: 'ayuda a no marearse', keep: true, fn: () => { cfg.comfort = !cfg.comfort; saveCfg(); } });
   items.push({ ico: '🌗', txt: 'Viñeta de miedo: ' + (cfg.vignette ? 'sí' : 'no'), sub: 'toca para cambiar', keep: true, fn: () => { cfg.vignette = !cfg.vignette; saveCfg(); } });
   items.push({ ico: '❓', txt: 'Ayuda de los mandos', fn: () => { closeModal(); openModal('help'); }, keepModal: true });
   items.push({ ico: '🚪', txt: 'Salir de VR', fn: () => { if (VR.session) VR.session.end(); } });
@@ -598,6 +607,7 @@ function onFrame(t, frame) {
     const prev = VR.lastState.split(','), now = sk.split(',');
     if (VR.lastState && (prev[0] !== now[0] || prev[1] !== now[1] || prev[2] !== now[2] || prev[3] !== now[3])) VR.fade = 1;
     VR.lastState = sk;
+    collectLights(A.scene);
     if (P.inCar && !VR.anchor) VR.anchor = { local: hy, car: true };
     else if (!P.inCar && VR.anchor && VR.anchor.car) { VR.anchor = null; }
     if ((P.pose === 'sit' || P.pose === 'lie') && P.seat) { VR.anchor = { local: hy, psi: P.seat.ry + PI, seat: true }; }
@@ -622,7 +632,7 @@ function onFrame(t, frame) {
     const x = R.ax[0], y = R.ax[1];
     if (!modal) {
       if (!VR.anchor || !VR.anchor.car) {
-        if (Math.abs(x) > 0.7 && !VR.turned) { VR.turned = true; const s = Math.sign(x) * cfg.snap * PI / 180; if (VR.anchor) { VR.anchor.local += s; VR.rigYaw = VR.anchor.psi - VR.anchor.local; } else VR.rigYaw -= s; }
+        if (Math.abs(x) > 0.7 && !VR.turned) { VR.turned = true; VR.turnFlash = 0.6; const s = Math.sign(x) * cfg.snap * PI / 180; if (VR.anchor) { VR.anchor.local += s; VR.rigYaw = VR.anchor.psi - VR.anchor.local; } else VR.rigYaw -= s; }
         else if (Math.abs(x) < 0.4) VR.turned = false;
       }
       if (Math.abs(y) > 0.8 && !VR.stairs && inside) { VR.stairs = true; const b = $(y < 0 ? 'upBtn' : 'downBtn'); if (b && !b.classList.contains('hidden')) b.click(); }
@@ -751,10 +761,14 @@ function updatePointers(A) {
   const same = (!prev && !hv) || (prev && hv && prev.panel === hv.panel && prev.idx === hv.idx && prev.el === hv.el);
   VR.hover = hv; VR.hoverHand = best ? best.hand : null;
   if (!same) { if (VR.modal === 'hub') drawHub(); else if (VR.modal === 'help') drawHelp(); else VR.dom.view = true; }
-  // scroll con la palanca del mando que apunta
-  if (VR.domOpen && hv && hv.el) {
-    const pad = VR.pads[VR.hoverHand]; const y = pad ? dz(pad.ax[1]) : 0;
-    if (y) { const sc = scrollable(hv.el); if (sc) { sc.scrollTop += y * 700 * (VR.dt || 0.014); markDirty(); } }
+  // scroll con la palanca del mando que apunta al menú (cualquiera de los dos)
+  if (VR.domOpen && VR.dom.info) {
+    for (const h of ['right', 'left']) {
+      const hit = VR.hits[h], pad = VR.pads[h]; if (!hit || !pad) continue;
+      const y = dz(pad.ax[1]); if (!y) continue;
+      const info = VR.dom.info, el = domTarget(info.left + hit.u * info.w, info.top + hit.v * info.h), sc = el && scrollable(el);
+      if (sc) { sc.scrollTop += y * 700 * (VR.dt || 0.014); markDirty(); break; }
+    }
   }
 }
 function scrollable(el) {
@@ -818,7 +832,7 @@ VRX.pose = function () {
     const rm = A.curRoom(); px = P.ix; pz = P.iy; base = rm ? rm.floorY : A.GY;
     if (P.pose === 'sit') base -= 6; else if (P.pose === 'lie') base -= 14;
   } else { px = P.x; pz = P.y; base = A.groundY(P.x, P.y); }
-  base += VR.eyeOffset * SCALE;
+  base += VR.eyeOffset * SCALE + (cfg.seated ? 0.45 * SCALE : 0); // sentado en el sofá de verdad: se sube la vista para no ver el mundo desde abajo
   if (Math.abs(base - VR.baseY) > 30 || VR.frames < 3) VR.baseY = base; else VR.baseY += (base - VR.baseY) * 0.25;
   const rig = VR.rig, hx = c.position.x * SCALE, hz = c.position.z * SCALE, cs = Math.cos(VR.rigYaw), sn = Math.sin(VR.rigYaw);
   rig.rotation.set(0, VR.rigYaw, 0);
@@ -885,6 +899,13 @@ function updateUi(A) {
   band.rotation.set(-0.12, B.yaw, 0); band.visible = band.visible && !VR.domOpen && !VR.modal;
   const fear = parseFloat($('fear') && $('fear').style.opacity) || 0;
   VR.fearMesh.visible = cfg.vignette && fear > 0.02; VR.fearMesh.material.opacity = clamp(fear * 1.1, 0, 1);
+  { // viñeta de confort: los bordes se oscurecen mientras andas, giras o vas en coche
+    const mv = A.player.inCar ? Math.min(1, Math.abs(A.car.v) / 260) : Math.hypot(VRX.mx, VRX.my);
+    const want = cfg.comfort && !VR.domOpen && !VR.modal ? Math.min(0.85, mv * 0.9 + (VR.turnFlash || 0)) : 0;
+    VR.turnFlash = Math.max(0, (VR.turnFlash || 0) - (VR.dt || 0.014) * 3);
+    VR.tunnel += (want - VR.tunnel) * Math.min(1, (VR.dt || 0.014) * (want > VR.tunnel ? 8 : 3));
+    VR.tunnelMesh.visible = VR.tunnel > 0.02; VR.tunnelMesh.material.opacity = VR.tunnel;
+  }
   VR.fadeMesh.visible = VR.fade > 0.01; VR.fadeMesh.material.opacity = clamp(VR.fade, 0, 1);
   updatePointers(A);
 }
