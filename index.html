@@ -51,6 +51,12 @@ code { background: #fff; border: 2px solid var(--ink); border-radius: 8px; paddi
 details { margin-top: 10px; }
 summary { cursor: pointer; font-weight: 700; font-size: 17px; }
 details p, details ul { margin-top: 8px; }
+.warn { background: #ffe1d9; border: 3px solid var(--ink); border-radius: 14px; padding: 8px 12px; font-weight: 600; margin: 12px 0 0; font-size: 16px; }
+.links { display: grid; gap: 12px; }
+.links > div { display: grid; gap: 4px; }
+.links code { display: block; font-size: 14px; padding: 6px 8px; }
+.copy { justify-self: start; font: inherit; font-weight: 700; font-size: 15px; background: var(--sun); border: 3px solid var(--ink); border-radius: 12px; padding: 3px 14px; cursor: pointer; box-shadow: 0 3px 0 var(--ink); }
+.copy:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
 .foot { text-align: center; color: #fff; opacity: .78; font-size: 14px; margin-top: 4px; }
 .foot code { background: rgba(255,255,255,.15); border: 0; color: #fff; }
 .foot a { color: #fff; }
@@ -74,7 +80,7 @@ details p, details ul { margin-top: 8px; }
     <h2>📱 En un móvil o tablet Android</h2>
     <h3>Forma 1 · Instalarla desde el navegador <span class="tag">sin avisos</span></h3>
     <ol>
-      <li>Abre <b>«Jugar ahora»</b> con <b>Chrome</b> (o Edge o Samsung Internet).</li>
+      <li>Abre <b>«Jugar ahora»</b> con <b>Chrome</b> (o Edge o Samsung Internet). Si el enlace te llega por WhatsApp u otra app, pulsa ⋮ → <b>«Abrir en Chrome»</b>.</li>
       <li>Pulsa <b>«📲 Instalar en este dispositivo»</b>, que sale en la portada. Si no sale, abre el menú ⋮ del navegador y elige <b>«Instalar app»</b>.</li>
       <li>Ya está: aparece <b>Chupi Gualy</b> con su icono, se abre a pantalla completa y <b>funciona sin internet</b>.</li>
     </ol>
@@ -87,15 +93,13 @@ details p, details ul { margin-top: 8px; }
       <li>Si sale <b>Google Play Protect</b>, pulsa <b>«Más detalles»</b> y luego <b>«Instalar de todos modos»</b> (o «Instalar sin analizar»). Si te ofrece <b>«Analizar app»</b>, mejor: Google la revisa en segundos y con eso la va conociendo. Es normal: Play Protect avisa de toda app que no viene de Google Play y que todavía no conoce. Esta no pide permisos ni internet.</li>
       <li>Pulsa <b>«Instalar»</b> y abre <b>Chupi Gualy</b>.</li>
     </ol>
-    <details>
-      <summary>Ya tenía una versión antigua</summary>
-      <p>Desinstálala antes de instalar esta: la app ahora lleva firma propia y Android no deja instalar una encima de la otra (se pierde la partida de la versión vieja). Las versiones nuevas desde esta sí se instalan encima sin perder nada.</p>
-    </details>
+    <p class="warn">⚠️ ¿Sale <b>«App no instalada»</b> o <b>«Conflicto con un paquete existente»</b>? Es que ya tienes una versión antigua de Chupi Gualy con otra firma. Desinstálala (Ajustes → Aplicaciones → Chupi Gualy → Desinstalar) y vuelve a abrir el archivo: se pierde la partida de la versión vieja, pero las versiones nuevas desde esta se instalan encima sin perder nada.</p>
   </section>
 
   <section class="card vr" id="gafas">
     <h2>🥽 Con gafas Meta Quest <span class="tag">VR</span></h2>
     <p class="ok" id="vrStatus" hidden></p>
+    <p class="ok">✅ En las gafas <b>no hay nada que instalar</b>: se juega directamente desde el Navegador, así que no hay instalación que pueda fallar.</p>
     <ol>
       <li>Ponte las gafas y abre el <b>Navegador</b> (el icono del globo del menú de aplicaciones).</li>
       <li>Escribe esta dirección y guárdala en favoritos:
@@ -113,6 +117,15 @@ details p, details ul { margin-top: 8px; }
       <tr><td>A, X o agarre</td><td>Usar lo que diga el cartel de abajo: entrar, subir al coche, sentarte, comprar…</td></tr>
       <tr><td>B o Y</td><td>Menú rápido: bolsillo, comida, dinero, ajustes, ayuda y salir de VR</td></tr>
     </table>
+    <details>
+      <summary>No me sale el botón de VR</summary>
+      <ul>
+        <li>Abre la página con el <b>Navegador de las gafas</b> (no desde una app, un mensaje o el móvil).</li>
+        <li>La dirección tiene que empezar por <b>https://</b> y no tener faltas; mejor entra desde esta página con el botón «Abrir el juego».</li>
+        <li>Actualiza las gafas (Ajustes → Sistema → Actualización de software) y vuelve a cargar la página (↻).</li>
+        <li>Si entra pero va a tirones: dentro de VR, botón <b>B</b> o <b>Y</b> → <b>«Gráficos»</b> para bajarlos. En ese mismo menú, <b>«Diagnóstico»</b> enseña los fotogramas, los mandos y los fallos.</li>
+      </ul>
+    </details>
     <details>
       <summary>Más cosas para las gafas</summary>
       <ul>
@@ -133,6 +146,15 @@ details p, details ul { margin-top: 8px; }
   </section>
 
   <section class="card">
+    <h2>🔗 Direcciones para copiar</h2>
+    <div class="links">
+      <div><b>Esta página (todo)</b><code>https://manuelbd145.github.io/chupi-gualy-descargas/</code><button type="button" class="copy">Copiar</button></div>
+      <div><b>Android: archivo APK</b><code>https://github.com/ManuelBD145/chupi-gualy-descargas/releases/latest/download/chupi-gualy.apk</code><button type="button" class="copy">Copiar</button></div>
+      <div><b>Gafas Meta Quest y navegador</b><code>https://manuelbd145.github.io/chupi-gualy-descargas/jugar/</code><button type="button" class="copy">Copiar</button></div>
+    </div>
+  </section>
+
+  <section class="card">
     <h2>Lo que tienes que saber</h2>
     <ul class="facts">
       <li>✈️ Después de la primera vez <b>funciona sin internet</b> (en el navegador instalado y en la app).</li>
@@ -145,6 +167,13 @@ details p, details ul { margin-top: 8px; }
   <p class="foot">Archivo directo del APK:<br><code>github.com/ManuelBD145/chupi-gualy-descargas/releases/latest/download/chupi-gualy.apk</code><br>Cada versión tiene su huella SHA-256 en <a href="https://github.com/ManuelBD145/chupi-gualy-descargas/releases">Releases</a>.</p>
 </main>
 <script>
+// botones «Copiar» de las direcciones
+document.querySelectorAll('.copy').forEach(b => b.addEventListener('click', async () => {
+  const txt = b.parentElement.querySelector('code').textContent;
+  try { await navigator.clipboard.writeText(txt); b.textContent = '¡Copiada!'; }
+  catch (e) { const r = document.createRange(); r.selectNodeContents(b.parentElement.querySelector('code')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selecciónala y copia'; }
+  setTimeout(() => { b.textContent = 'Copiar'; }, 2200);
+}));
 // si esta página se abre en unas gafas, se avisa y se resalta la parte de VR
 (async () => {
   const ua = navigator.userAgent, quest = /OculusBrowser|Quest/i.test(ua);
