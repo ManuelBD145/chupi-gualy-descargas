@@ -74,6 +74,53 @@ async function enter() {
   }
 }
 
+// ---------- diagnóstico: lo último que ha fallado, para poder contarlo si algo no va bien en las gafas ----------
+function startLog() {
+  VR.log = []; VR.errCount = 0;
+  const add = (kind, msg) => { VR.errCount++; VR.log.push(kind + ' ' + String(msg).replace(/\s+/g, ' ').slice(0, 140)); if (VR.log.length > 8) VR.log.shift(); };
+  VR.onErr = e => add('error:', (e && e.message) || e);
+  VR.onRej = e => add('promesa:', e && e.reason && (e.reason.message || e.reason));
+  addEventListener('error', VR.onErr); addEventListener('unhandledrejection', VR.onRej);
+  VR.cerr = console.error; console.error = function () { try { add('consola:', [].slice.call(arguments).join(' ')); } catch (e) {} return VR.cerr.apply(console, arguments); };
+}
+function stopLog() {
+  if (VR.onErr) { removeEventListener('error', VR.onErr); removeEventListener('unhandledrejection', VR.onRej); VR.onErr = null; }
+  if (VR.cerr) { console.error = VR.cerr; VR.cerr = null; }
+}
+function drawDiag() {
+  const P = VR.panels.help, ctx = P.ctx, W = P.canvas.width, H = P.canvas.height, A = VRX.api, ses = VR.session;
+  ctx.clearRect(0, 0, W, H);
+  card(ctx, 10, 10, W - 20, H - 30, PAPER, 44, 9, 11);
+  ctx.fillStyle = INK; ctx.textBaseline = 'middle'; ctx.textAlign = 'left'; ctx.font = `700 56px ${FONT}`;
+  ctx.fillText('🛠️ Diagnóstico', 64, 84);
+  const ua = navigator.userAgent, quest = (/Quest[ \w]*?(?=[;)\s]Build|\))/.exec(ua) || /Quest ?\w*/.exec(ua) || ['otras gafas'])[0], br = (/(OculusBrowser|Chrome)\/[\d.]+/.exec(ua) || ['?'])[0];
+  const lay = ses && ses.renderState && ses.renderState.baseLayer, pads = Object.keys(VR.pads).map(k => k + ': ' + ((VR.pads[k].src.profiles || [])[0] || '?')).join(' · ');
+  const fps = VR.avgMs ? Math.round(1000 / VR.avgMs) + ' por segundo (' + VR.avgMs + ' ms)' : 'midiendo…';
+  const rows = [
+    ['Gafas', quest + ' · ' + br],
+    ['Fotogramas', fps],
+    ['Dibujo', (VR.calls || 0) + ' llamadas · ' + Math.round((VR.tris || 0) / 1000) + ' mil triángulos (los dos ojos)'],
+    ['Gráficos', ['altos', 'medios', 'bajos'][cfg.quality] + (A.renderer.shadowMap.enabled ? ' · con sombras' : ' · sin sombras')],
+    ['Pantalla de las gafas', lay ? lay.framebufferWidth + ' × ' + lay.framebufferHeight + (lay.antialias ? ' · suavizado' : '') : '?'],
+    ['Mandos', pads || 'ninguno detectado'],
+    ['Suelo / altura', (VR.eyeOffset ? 'sentado (sin suelo)' : 'suelo de la sala') + ' · cabeza a ' + (VR.cam.position.y).toFixed(2) + ' m'],
+    ['Juego', ($('verTxt') ? $('verTxt').textContent : '?') + ' · web ' + (document.querySelector('script[src="vr.js"]') ? 'instalable' : 'suelta')],
+    ['Fallos desde que entraste', String(VR.errCount || 0)]
+  ];
+  rows.forEach((rw, k) => {
+    const y = 130 + k * 70;
+    ctx.fillStyle = '#6a5f85'; ctx.font = `600 27px ${FONT}`; ctx.fillText(rw[0], 70, y + 18, 380);
+    ctx.fillStyle = INK; ctx.font = `600 31px ${FONT}`; ctx.fillText(rw[1], 440, y + 18, W - 500);
+  });
+  ctx.fillStyle = '#b3340f'; ctx.font = `400 25px ${FONT}`;
+  (VR.log || []).slice(-3).forEach((l, k) => ctx.fillText(l, 70, 790 + k * 38, W - 140));
+  const hot = VR.hover && VR.hover.panel === 'help';
+  card(ctx, W / 2 - 200, H - 170, 400, 100, hot ? SUN : ACCENT, 32, 7, 8);
+  ctx.fillStyle = hot ? INK : '#fff'; ctx.textAlign = 'center'; ctx.font = `700 46px ${FONT}`; ctx.fillText('Cerrar', W / 2, H - 118);
+  VR.helpRect = { x: W / 2 - 200, y: H - 170, w: 400, h: 100 };
+  P.tex.needsUpdate = true;
+}
+
 // ---------- calidad gráfica ----------
 // altos: como en el móvil · medios: sombras más pequeñas y que se actualizan menos, y el horizonte más cerca · bajos: sin sombras y el horizonte aún más cerca
 const Q_FOG = [1, 0.8, 0.55], Q_SHADOW_EVERY = [4, 8, 8];
@@ -113,6 +160,7 @@ async function begin(session) {
   r.xr.enabled = true;
   r.xr.setAnimationLoop(onFrame);
   session.addEventListener('end', onEnd);
+  startLog();
   VR.sel = {}; // si usas las manos en vez de los mandos, el pellizco llega como "select" (y el puño cerrado como "squeeze")
   for (const [ty, on] of [['selectstart', true], ['selectend', false], ['squeezestart', true], ['squeezeend', false]]) {
     session.addEventListener(ty, e => { const h = e.inputSource && e.inputSource.handedness === 'left' ? 'left' : 'right'; VR.sel[h + (ty.startsWith('select') ? 'select' : 'squeeze')] = on; });
@@ -144,6 +192,7 @@ async function begin(session) {
 
 function onEnd() {
   const A = VRX.api, r = A.renderer, scene = A.scene;
+  stopLog();
   VRX.on = false; VRX.mx = VRX.my = 0; VRX.walk = 1;
   try { r.xr.setAnimationLoop(null); } catch (e) {}
   r.xr.enabled = false;
@@ -279,6 +328,7 @@ function hubItems() {
   items.push({ ico: '⭕', txt: 'Viñeta al moverte: ' + (cfg.comfort ? 'sí' : 'no'), sub: 'ayuda a no marearse', keep: true, fn: () => { cfg.comfort = !cfg.comfort; saveCfg(); } });
   items.push({ ico: '🌗', txt: 'Viñeta de miedo: ' + (cfg.vignette ? 'sí' : 'no'), sub: 'toca para cambiar', keep: true, fn: () => { cfg.vignette = !cfg.vignette; saveCfg(); } });
   items.push({ ico: '❓', txt: 'Ayuda de los mandos', fn: () => { closeModal(); openModal('help'); }, keepModal: true });
+  items.push({ ico: '🛠️', txt: 'Diagnóstico', sub: 'fotogramas, mandos y fallos', fn: () => { closeModal(); VR.diag = true; openModal('help'); }, keepModal: true });
   items.push({ ico: '🚪', txt: 'Salir de VR', fn: () => { if (VR.session) VR.session.end(); } });
   return items;
 }
@@ -309,6 +359,7 @@ function drawHub() {
 
 // ----- ayuda de los mandos -----
 function drawHelp() {
+  if (VR.diag) return drawDiag();
   const P = VR.panels.help, ctx = P.ctx, W = P.canvas.width, H = P.canvas.height;
   ctx.clearRect(0, 0, W, H);
   card(ctx, 10, 10, W - 20, H - 30, PAPER, 44, 9, 11);
@@ -566,7 +617,7 @@ function openModal(kind) {
 function closeModal() {
   if (!VR.modal) return;
   const p = VR.panels[VR.modal]; if (p) p.mesh.visible = false;
-  VR.modal = null; VR.hover = null;
+  VR.modal = null; VR.hover = null; VR.diag = false;
   if (VR.pausedByMe) { VR.pausedByMe = false; window.__chupi.fn.syncPaused(); }
 }
 function placeInFront(P, dist) {
