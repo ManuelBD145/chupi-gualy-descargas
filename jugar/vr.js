@@ -17,6 +17,8 @@ const FONT = '"Fredoka", "Trebuchet MS", "Segoe UI", system-ui, sans-serif';
 // ---------- ajustes de las gafas (se guardan en el navegador) ----------
 const DEF = { snap: 45, speed: 1, vignette: true, comfort: true, seated: false, helpSeen: false };
 const cfg = (() => { try { return Object.assign({}, DEF, JSON.parse(localStorage.getItem('chupi.vr') || '{}')); } catch (e) { return Object.assign({}, DEF); } })();
+// calidad gráfica por defecto: las Quest 3, 3S y Pro aguantan los gráficos altos; las demás empiezan en medios
+if (cfg.quality === undefined) cfg.quality = /Quest (3|Pro)/i.test(navigator.userAgent) ? 0 : 1;
 const saveCfg = () => { try { localStorage.setItem('chupi.vr', JSON.stringify(cfg)); } catch (e) {} };
 
 const VR = {
@@ -72,6 +74,26 @@ async function enter() {
   }
 }
 
+// ---------- calidad gráfica ----------
+// altos: como en el móvil · medios: sombras más pequeñas y que se actualizan menos, y el horizonte más cerca · bajos: sin sombras y el horizonte aún más cerca
+const Q_FOG = [1, 0.8, 0.55], Q_SHADOW_EVERY = [4, 8, 8];
+function applyQuality(A) {
+  const r = A.renderer, sun = A.sun, q = cfg.quality;
+  if (!VR.orig) return;
+  const on = VR.orig.shadows && q < 2;
+  if (r.shadowMap.enabled !== on) r.shadowMap.enabled = on; // al cambiarlo, los materiales se vuelven a preparar una vez (un tirón)
+  const size = q === 0 ? VR.orig.map : Math.min(1024, VR.orig.map);
+  if (sun.shadow.mapSize.x !== size) { sun.shadow.mapSize.set(size, size); if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; } }
+  r.shadowMap.needsUpdate = true;
+}
+function restoreQuality(A) {
+  if (!VR.orig) return;
+  const r = A.renderer, sun = A.sun;
+  r.shadowMap.enabled = VR.orig.shadows;
+  if (sun.shadow.mapSize.x !== VR.orig.map) { sun.shadow.mapSize.set(VR.orig.map, VR.orig.map); if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; } }
+  VR.orig = null;
+}
+
 // ---------- dentro de las gafas ----------
 function collectLights(scene) { pointLights.length = 0; scene.traverse(o => { if ((o.isPointLight || o.isSpotLight) && o.distance > 0) pointLights.push(o); }); }
 let Tj, tmpV, tmpV2, tmpQ, tmpM, Yaxis;
@@ -95,13 +117,17 @@ async function begin(session) {
   for (const [ty, on] of [['selectstart', true], ['selectend', false], ['squeezestart', true], ['squeezeend', false]]) {
     session.addEventListener(ty, e => { const h = e.inputSource && e.inputSource.handedness === 'left' ? 'left' : 'right'; VR.sel[h + (ty.startsWith('select') ? 'select' : 'squeeze')] = on; });
   }
-  session.addEventListener('visibilitychange', () => {
-    if (session.visibilityState && session.visibilityState !== 'visible' && !A.paused) A.openMenu(); // te quitas las gafas: el juego se pausa
+  session.addEventListener('visibilitychange', () => { // te quitas las gafas o abres el menú de las gafas: el juego espera hasta que vuelvas
+    const away = !!session.visibilityState && session.visibilityState !== 'visible';
+    if (away && !A.paused) { VR.blurPaused = true; window.__chupi.fn.paused = true; }
+    else if (!away && VR.blurPaused) { VR.blurPaused = false; window.__chupi.fn.syncPaused(); }
   });
   await r.xr.setSession(session);
   const layer = session.renderState && session.renderState.baseLayer;
   if (layer && 'fixedFoveation' in layer) layer.fixedFoveation = 1;
-  try { VR.shadowType = r.shadowMap.type; r.shadowMap.type = T.PCFShadowMap; r.shadowMap.autoUpdate = false; r.shadowMap.needsUpdate = true; } catch (e) {}
+  VR.orig = { shadows: r.shadowMap.enabled, map: A.sun.shadow.mapSize.x };
+  try { r.shadowMap.autoUpdate = false; r.shadowMap.needsUpdate = true; } catch (e) {}
+  applyQuality(A);
   if (A.deco.on) A.closeDeco();
   for (const fb of A.fadeables) { fb.a = 1; for (const mt of fb.mats) { mt.opacity = 1; mt.depthWrite = true; } for (const ms of fb.meshes) ms.castShadow = true; }
   collectLights(scene);
@@ -121,11 +147,11 @@ function onEnd() {
   VRX.on = false; VRX.mx = VRX.my = 0; VRX.walk = 1;
   try { r.xr.setAnimationLoop(null); } catch (e) {}
   r.xr.enabled = false;
-  try { r.shadowMap.autoUpdate = true; if (VR.shadowType !== undefined) r.shadowMap.type = VR.shadowType; } catch (e) {}
+  try { r.shadowMap.autoUpdate = true; restoreQuality(A); } catch (e) {}
   for (const c of VR.ctrl) releaseController(c);
   for (const k in VR.panels) { const q = VR.panels[k]; try { q.tex.dispose(); q.mesh.geometry.dispose(); q.mesh.material.dispose(); } catch (e) {} }
   if (VR.rig) { scene.remove(VR.rig); VR.rig = null; }
-  if (VR.pausedByMe) { VR.pausedByMe = false; try { window.__chupi.fn.syncPaused(); } catch (e) {} }
+  if (VR.pausedByMe || VR.blurPaused) { VR.pausedByMe = VR.blurPaused = false; try { window.__chupi.fn.syncPaused(); } catch (e) {} }
   VR.session = null; VR.ctrl = []; VR.pads = {}; VR.panels = {}; VR.modal = null; VR.domOpen = false; VR.dom.el = null; VR.dom.info = null; VR.wristOn = null; VR.drag = null; VR.hover = null; pointLights.length = 0;
   if (domObserver) { domObserver.disconnect(); domObserver = null; }
   A.resize();
@@ -248,6 +274,7 @@ function hubItems() {
   if (vis('downBtn')) items.push({ ico: '⬇️', txt: 'Bajar de planta', fn: () => $('downBtn').click() });
   items.push({ ico: '🔄', txt: 'Girar ' + (cfg.snap === 90 ? '90°' : cfg.snap + '°'), sub: 'toca para cambiar', keep: true, fn: () => { cfg.snap = cfg.snap === 45 ? 90 : cfg.snap === 90 ? 30 : 45; saveCfg(); } });
   items.push({ ico: '🚶', txt: 'Andar: ' + (cfg.speed < 1 ? 'despacio' : cfg.speed > 1 ? 'deprisa' : 'normal'), sub: 'toca para cambiar', keep: true, fn: () => { cfg.speed = cfg.speed === 1 ? 1.4 : cfg.speed > 1 ? 0.7 : 1; saveCfg(); } });
+  items.push({ ico: '🎮', txt: 'Gráficos: ' + ['altos', 'medios', 'bajos'][cfg.quality], sub: 'si va a tirones, bájalos', keep: true, fn: () => { cfg.quality = (cfg.quality + 1) % 3; saveCfg(); applyQuality(VRX.api); VR.perfT = 0; } });
   items.push({ ico: '🪑', txt: 'Jugar sentado: ' + (cfg.seated ? 'sí' : 'no'), sub: 'sube un poco la vista', keep: true, fn: () => { cfg.seated = !cfg.seated; saveCfg(); } });
   items.push({ ico: '⭕', txt: 'Viñeta al moverte: ' + (cfg.comfort ? 'sí' : 'no'), sub: 'ayuda a no marearse', keep: true, fn: () => { cfg.comfort = !cfg.comfort; saveCfg(); } });
   items.push({ ico: '🌗', txt: 'Viñeta de miedo: ' + (cfg.vignette ? 'sí' : 'no'), sub: 'toca para cambiar', keep: true, fn: () => { cfg.vignette = !cfg.vignette; saveCfg(); } });
@@ -676,6 +703,12 @@ function onFrame(t, frame) {
   }
   VR.prevHead = { x: hx, z: hz };
   VR.fade = Math.max(0, VR.fade - dt * 3.2);
+  VR.perfT = (VR.perfT || 0) + dt; VR.perfSum = (VR.perfSum || 0) + dt; VR.perfN = (VR.perfN || 0) + 1;
+  if (VR.perfT > 4) { // cada 4 segundos: ¿cuánto tarda un fotograma de media? (más de 20 ms = menos de 50 por segundo)
+    const avg = VR.perfSum / VR.perfN; VR.avgMs = Math.round(avg * 1000);
+    if (avg > 0.02 && cfg.quality === 0 && !VR.noAuto && VR.frames > 120) { cfg.quality = 1; saveCfg(); applyQuality(A); A.toast('Gráficos más sencillos para que vaya más fluido. Puedes cambiarlo en el menú rápido (B).', 5); }
+    VR.perfT = 0; VR.perfSum = 0; VR.perfN = 0;
+  }
   try { A.loop(t); VR.errors = 0; }
   catch (e) {
     console.error('VR: fallo en el fotograma', e);
@@ -851,9 +884,11 @@ VRX.render = function () {
   updateUi(A);
   // en las gafas las unidades de cámara son metros: la niebla y el alcance de las luces se ajustan a esa escala
   const fog = scene.fog; let fn = 0, ff = 0;
-  if (fog) { fn = fog.near; ff = fog.far; fog.near = fn / SCALE; fog.far = ff / SCALE; }
+  const fk = Q_FOG[cfg.quality];
+  if (fog) { fn = fog.near; ff = fog.far; fog.near = fn * fk / SCALE; fog.far = ff * fk / SCALE; }
+  { const far = clamp((fog ? ff * fk : 3000) / SCALE + 15, 60, 400); if (Math.abs(far - VR.cam.far) > far * 0.04) VR.cam.far = far; } // lo que queda más allá de la niebla ni se dibuja
   const saved = pointLights.map(l => l.distance); pointLights.forEach(l => { l.distance /= SCALE; });
-  if (VR.frames % 4 === 1) r.shadowMap.needsUpdate = true; // las sombras se actualizan cada pocos fotogramas para ir más ligero
+  if (VR.frames % Q_SHADOW_EVERY[cfg.quality] === 1) r.shadowMap.needsUpdate = true; // las sombras se actualizan cada pocos fotogramas para ir más ligero
   r.render(scene, VR.cam);
   VR.calls = r.info.render.calls; VR.tris = r.info.render.triangles;
   if (VR.shot) { try { VR.shotData = A.cv.toDataURL('image/png'); } catch (e) { VR.shotData = 'ERR ' + e.message; } VR.shot = null; }
